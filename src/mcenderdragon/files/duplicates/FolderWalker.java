@@ -93,14 +93,7 @@ public class FolderWalker
 		{
 			if(ftc!=null)
 			{
-				synchronized (ftc) 
-				{
-					try {
-						ftc.wait();
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-				}
+				ftc.waitUntilDone();
 				checked = 0;
 			}
 			
@@ -176,6 +169,7 @@ public class FolderWalker
 	{
 		private final File folder;
 		private final long modifedTime;
+		private boolean done = false;
 		
 		public FolderToCheck(File folder) 
 		{
@@ -201,9 +195,25 @@ public class FolderWalker
 			}
 			
 			System.out.println("Finished " + folder);
+			done = true;
 			synchronized (this)
 			{
 				this.notifyAll();
+			}
+		}
+		
+		public synchronized void waitUntilDone()
+		{
+			try
+			{
+				while(!done)
+				{
+					this.wait(1000);
+				}
+			}
+			catch(InterruptedException e)
+			{
+				e.printStackTrace();
 			}
 		}
 		
