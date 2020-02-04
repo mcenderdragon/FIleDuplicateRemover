@@ -87,8 +87,23 @@ public class FolderWalker
 	
 	public void work(Runnable callBack)
 	{
+		FolderToCheck ftc = null;
+		int checked = 0;
 		while(true)
 		{
+			if(ftc!=null)
+			{
+				synchronized (ftc) 
+				{
+					try {
+						ftc.wait();
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+				checked = 0;
+			}
+			
 			FolderToCheck w;
 			synchronized (work) 
 			{
@@ -103,6 +118,7 @@ public class FolderWalker
 				System.out.println("Reduced work size from " + s + " to " + work.size() + Main.hashing + " " + Main.fileIO);
 			}
 			System.out.println("Searching " + w.folder);
+			checked++;
 			
 			ArrayList<CompletableFuture<?>> list = new ArrayList<CompletableFuture<?>>();
 			if(w.folder.listFiles()!=null)
@@ -149,6 +165,10 @@ public class FolderWalker
 					}
 				}, Main.hashing);
 			}
+			if(checked > 1000)
+			{
+				ftc = w;
+			}
 		}
 	}
 	
@@ -181,6 +201,10 @@ public class FolderWalker
 			}
 			
 			System.out.println("Finished " + folder);
+			synchronized (this)
+			{
+				this.notifyAll();
+			}
 		}
 		
 		@Override
