@@ -91,7 +91,7 @@ public class FolderWalker
 		int checked = 0;
 		while(true)
 		{
-			if(ftc!=null)
+			if(checked > 1000)
 			{
 				ftc.waitUntilDone();
 				checked = 0;
@@ -102,6 +102,11 @@ public class FolderWalker
 			{
 				if(work.isEmpty())
 				{
+					if(ftc!=null)
+					{
+						ftc.waitUntilDone();
+					}
+					
 					Main.hashing.execute(callBack);
 					return;
 				}
@@ -158,10 +163,7 @@ public class FolderWalker
 					}
 				}, Main.hashing);
 			}
-			if(checked > 1000)
-			{
-				ftc = w;
-			}
+			ftc = w;
 		}
 	}
 	
