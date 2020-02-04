@@ -1,9 +1,11 @@
 package mcenderdragon.files.duplicates;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -154,6 +156,8 @@ public class Main
 		}
 	}
 	
+	private static File duplicates;
+	
 	public static void load(String parentFolder)
 	{
 		File parent = new File(parentFolder).getAbsoluteFile();
@@ -163,6 +167,7 @@ public class Main
 		
 		File hashes = new File(dataDir, "hashes2file.map");
 		File blacklist = new File(dataDir, "blacklist.regex");
+		duplicates = new File(dataDir, "duplicates.txt");
 		if(!blacklist.exists())
 		{
 			try {
@@ -207,7 +212,16 @@ public class Main
 	
 	public static void onDuplicate(HashedFileStorage storage, FileHash hash)
 	{
-		System.out.println(Arrays.toString(storage.getFiles(hash).toArray()));
+		String s = Arrays.toString(storage.getFiles(hash).toArray());
+		try {
+			BufferedWriter output = new BufferedWriter(new FileWriter(duplicates, true));
+			output.append(s);
+			output.newLine();
+			output.close();
+		} catch (IOException e) 
+		{
+			e.printStackTrace();
+		}
 	}
 	
 	
